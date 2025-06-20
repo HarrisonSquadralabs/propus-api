@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  architect_db:
+    image: postgres:15
+    container_name: architect_container
+    restart: always
+    environment:
+      POSTGRES_USER: architect_user
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: architect_db
+    ports:
+      - "5433:5432" 
+    volumes:
+      - architect_pgdata:/var/lib/postgresql/data
+
+volumes:
+  architect_pgdata:

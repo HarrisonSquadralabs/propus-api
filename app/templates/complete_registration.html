@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Registration</title>
+    <script>
+        function showFields() {
+            var role = document.getElementById("role").value;
+            document.getElementById("customer_fields").style.display = (role === "Customer") ? "block" : "none";
+            document.getElementById("supplier_fields").style.display = (role === "Supplier") ? "block" : "none";
+            document.getElementById("architect_info_field").style.display = (role === "Architect" || role === "Engineer") ? "block" : "none";
+        }
+        window.onload = showFields;
+    </script>
+</head>
+<body>
+    <h2>Complete your registration</h2>
+    <form method="post">
+        <input type="hidden" name="user_id" value="{{ user_id }}">
+        <label for="role">Select your role:</label>
+        <select name="role" id="role" required onchange="showFields()">
+            <option value="">Select</option>
+            <option value="Architect">Architect</option>
+            <option value="Customer">Customer</option>
+            <option value="Engineer">Engineer</option>
+            <option value="Supplier">Supplier</option>
+        </select>
+        <br><br>
+        <div id="customer_fields" style="display:none;">
+            <label for="customer_phone">Phone:</label>
+            <input type="text" name="customer_phone" id="customer_phone">
+            <br><br>
+        </div>
+        <div id="supplier_fields" style="display:none;">
+            <label for="supplier_phone">Phone:</label>
+            <input type="text" name="supplier_phone" id="supplier_phone">
+            <br>
+            <label for="company">Company:</label>
+            <input type="text" name="company" id="company">
+            <br>
+            <label for="address">Address:</label>
+            <input type="text" name="address" id="address">
+            <br><br>
+        </div>
+        <div id="architect_info_field" style="display:none;">
+            <label for="architect_info">Architect Info:</label>
+            <input type="text" name="architect_info" id="architect_info">
+            <br><br>
+        </div>
+        <button type="submit">Complete Registration</button>

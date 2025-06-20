@@ -1,0 +1,46 @@
+# .gitignore para Python + FastAPI
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+env/
+venv/
+ENV/
+.venv/
+.pipenv/
+
+# Archivos de configuración de entorno
+.env
+.env.*
+
+# Archivos de bases de datos locales
+*.sqlite3
+
+# Archivos de logs
+*.log
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de test coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Archivos de dist y build
+build/
+dist/
+*.egg-info/
