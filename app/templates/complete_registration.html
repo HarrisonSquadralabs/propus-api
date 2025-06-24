@@ -5,9 +5,9 @@
     <script>
         function showFields() {
             var role = document.getElementById("role").value;
-            document.getElementById("customer_fields").style.display = (role === "Customer") ? "block" : "none";
-            document.getElementById("supplier_fields").style.display = (role === "Supplier") ? "block" : "none";
-            document.getElementById("architect_info_field").style.display = (role === "Architect" || role === "Engineer") ? "block" : "none";
+            document.getElementById("customer_fields").style.display = (role === "customer") ? "block" : "none";
+            document.getElementById("supplier_fields").style.display = (role === "supplier") ? "block" : "none";
+            document.getElementById("architect_info_field").style.display = (role === "architect" || role === "Engineer") ? "block" : "none";
         }
         window.onload = showFields;
     </script>
@@ -19,10 +19,10 @@
         <label for="role">Select your role:</label>
         <select name="role" id="role" required onchange="showFields()">
             <option value="">Select</option>
-            <option value="Architect">Architect</option>
-            <option value="Customer">Customer</option>
-            <option value="Engineer">Engineer</option>
-            <option value="Supplier">Supplier</option>
+            <option value="architect">Architect</option>
+            <option value="customer">Customer</option>
+            
+            <option value="supplier">Supplier</option>
         </select>
         <br><br>
         <div id="customer_fields" style="display:none;">

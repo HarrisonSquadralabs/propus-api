@@ -1,6 +1,7 @@
 from logging.config import fileConfig
 from app.core.database import Base 
-from app.models import user, customer_info, supplier_info, project  
+from app.models import supplier_role, user, customer_role,architect_role,permission,role_permissions, project 
+
 from app.core.config import settings  
 from sqlalchemy.engine import url as sa_url
 from sqlalchemy import engine_from_config

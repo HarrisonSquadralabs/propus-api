@@ -5,9 +5,11 @@ from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from uuid import UUID
+
 from app.core.config import settings
 from app.core.database import get_db
-from app.models import User, CustomerInfo, SupplierInfo
+from app.models import User, CustomerRole, SupplierRole, Role, RoleType
 
 router = APIRouter(prefix="/auth/google", tags=["auth-google"])
 
@@ -25,9 +27,7 @@ oauth.register(
     client_id=GOOGLE_CLIENT_ID,
     client_secret=GOOGLE_CLIENT_SECRET,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
+    client_kwargs={'scope': 'openid email profile'}
 )
 
 templates = Jinja2Templates(directory="app/templates")
@@ -41,37 +41,40 @@ async def login_via_google(request: Request):
 async def auth_google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     token = await oauth.google.authorize_access_token(request)
     user_info = await oauth.google.userinfo(token=token)
+    
     email = user_info["email"]
     first_name = user_info.get("given_name", "")
     last_name = user_info.get("family_name", "")
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalars().first()
+
     if not user:
         user = User(
             email=email,
             first_name=first_name,
             last_name=last_name,
             hashed_password=None,
-            role="pending", 
+            role=None,
             is_completed=False
         )
         db.add(user)
         await db.commit()
         await db.refresh(user)
+
     if not user.is_completed:
         return RedirectResponse(url=f"/auth/google/complete-registration?user_id={user.id}")
     else:
-        return RedirectResponse("http://localhost:8000/docs")
-    
+        return RedirectResponse(url="http://localhost:8000/docs")  
+
 @router.get("/complete-registration")
-async def show_complete_registration_form(request: Request, user_id: int):
+async def show_complete_registration_form(request: Request, user_id: UUID):
     return templates.TemplateResponse("complete_registration.html", {"request": request, "user_id": user_id})
-   
+
 @router.post("/complete-registration")
 async def complete_registration(
     request: Request,
-    user_id: int = Form(...),
+    user_id: UUID = Form(...),
     role: str = Form(...),
     architect_info: str = Form(None),
     customer_phone: str = Form(None),
@@ -84,26 +87,35 @@ async def complete_registration(
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    user.role = role
+
+    result = await db.execute(select(Role).where(Role.type == role))
+    db_role = result.scalars().first()
+    if not db_role:
+        raise HTTPException(status_code=400, detail="Invalid role selected")
+
+    if role == RoleType.customer and not customer_phone:
+        raise HTTPException(status_code=400, detail="Customer phone is required")
+    elif role == RoleType.supplier and (not supplier_phone or not company or not address):
+        raise HTTPException(status_code=400, detail="Supplier info is incomplete")
+    elif role == RoleType.architect and not architect_info:
+        raise HTTPException(status_code=400, detail="Architect info is required")
+
+    user.role = db_role
     user.architect_info = architect_info
     user.is_completed = True
     db.add(user)
     await db.commit()
     await db.refresh(user)
 
-    
-    if role == "Customer":
-        customer_info = CustomerInfo(user_id=user.id, phone=customer_phone)
-        db.add(customer_info)
-        await db.commit()
-    elif role == "Supplier":
-        supplier_info = SupplierInfo(
+    if role == RoleType.customer:
+        db.add(CustomerRole(user_id=user.id, phone=customer_phone))
+    elif role == RoleType.supplier:
+        db.add(SupplierRole(
             user_id=user.id,
             phone=supplier_phone,
             company=company,
             address=address
-        )
-        db.add(supplier_info)
-        await db.commit()
+        ))
+    await db.commit()
 
     return templates.TemplateResponse("registration_completed.html", {"request": request, "user": user})

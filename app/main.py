@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.routers import project
-from app.routers.auth import auth, user, auth_google
+from app.routers import project, user
+from app.routers.auth import auth, auth_google
 from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import settings
 

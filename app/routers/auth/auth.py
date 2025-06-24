@@ -25,7 +25,7 @@ templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(tags=["auth"])
 
 # --- LOGIN ---
-@router.post("/login/access-token", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)

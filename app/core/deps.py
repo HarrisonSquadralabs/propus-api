@@ -4,8 +4,9 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.core.config import settings
-from app.models.user import User, UserRole
+from app.models.user import User  
 from app.core.database import get_db  
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/access-token")
 
 async def get_current_user(
@@ -24,7 +25,6 @@ async def get_current_user(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalars().first()
@@ -46,13 +46,3 @@ async def get_current_active_superuser(
     if not current_user.is_superuser:
         raise HTTPException(status_code=400, detail="User lacks superuser privileges")
     return current_user
-
-def require_role(required_role: UserRole):
-    async def role_checker(current_user: User = Depends(get_current_active_user)):
-        if current_user.role != required_role:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-              detail=f"Access denied: required role {required_role}, you have {current_user.role}"
-            )
-        return current_user
-    return role_checker

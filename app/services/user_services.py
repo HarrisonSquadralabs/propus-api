@@ -1,12 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
 from app.models.user import User
 from app.schemas.user import UserInDB
 from app.core.security import verify_password, get_password_hash
 
 async def get_user(db: AsyncSession, email: str) -> UserInDB | None:
-    query = select(User).where(User.email == email)
+    query = select(User).options(selectinload(User.role)).where(User.email == email)
     result = await db.execute(query)
     user = result.scalars().first()
     if user:
@@ -16,12 +17,13 @@ async def get_user(db: AsyncSession, email: str) -> UserInDB | None:
             email=user.email,
             disabled=user.disabled,
             hashed_password=user.hashed_password,
-            role=user.role,
+            role_name=user.role.type.value
         )
     return None
 
+
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    query = select(User).where(User.email == email)
+    query = select(User).options(selectinload(User.role)).where(User.email == email)
     result = await db.execute(query)
     return result.scalars().first() 
 
@@ -38,7 +40,7 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
         last_name=user.last_name,
         disabled=user.disabled,
         hashed_password=user.hashed_password,
-        role=user.role,
+        role_name=user.role.type.value
     )
 
 

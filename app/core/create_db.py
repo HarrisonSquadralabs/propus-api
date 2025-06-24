@@ -1,6 +1,6 @@
 import asyncio
 from app.core.database import engine
-from app.models import user, project, customer_info, supplier_info, project_file, token, entity
+from app.models import supplier_role, user, project, customer_role, architect_role, permission, role_permissions, token, entity
 from app.models.user import User
 
 

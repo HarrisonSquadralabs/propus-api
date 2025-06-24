@@ -1,14 +1,15 @@
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, Integer, String, Float, Enum as SqlEnum, ForeignKey
 from sqlalchemy.orm import relationship
+from app.models.entity import EntityAbstract 
 from app.schemas.enum import ProjectType, Currency, ProjectStatus
-from app.models.entity import EntityAbstract
 
 class Project(EntityAbstract):
     __tablename__ = "projects"
 
     name = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    architect_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
+    architect_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
     project_type = Column(SqlEnum(ProjectType), nullable=False)
     currency = Column(SqlEnum(Currency), nullable=False)
     budget = Column(Float, nullable=False)
